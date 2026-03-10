@@ -14,6 +14,7 @@ def plotFile(input):
     y/=re
     z/=re
 
+    time = 0
     #XY Plot
     if (sys.argv[1]=="XY"):
         plt.scatter(x,y,s=0.1,c='w')

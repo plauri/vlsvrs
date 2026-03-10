@@ -22,8 +22,8 @@ pub enum SAMPLING {
 }
 
 //Some configuration params
-const INIT_TIME: f32 = 305.0;
-const PPC: usize = 1024;
+const INIT_TIME: f32 = 1430.0;
+const PPC: usize = 1<<20;
 const STRIDE: usize = 32;
 const SPARSE: f32 = 1e-16;
 const LSHELL_MIN: f64 = 8.0;
@@ -147,7 +147,7 @@ fn main() {
                 .collect::<Vec<Option<Particle>>>()
         })
         .collect();
-    let file = File::create("lucky_particles.txt").expect("Could not open output file");
+    let file = File::create("lucky_particles_1430.txt").expect("Could not open output file");
     let mut writer = BufWriter::new(file);
     let mut nparticles = 0;
     for particle in &particles {

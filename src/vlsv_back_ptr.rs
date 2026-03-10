@@ -11,8 +11,8 @@ use std::io::{BufRead, BufReader};
 use std::sync::{Arc, Mutex};
 
 const TOUT: f64 = -1.0;
-const TMIN: f64 = 1380.0;
-const TMAX: f64 = 1401.0;
+const TMIN: f64 = 1410.0;
+const TMAX: f64 = 1431.0;
 const DEFAULT_VLSV: &str = "/wrk-vakka/group/spacephysics/vlasiator/3D/FHA/bulk1/";
 
 pub fn backtrace_population_cpu_adpt<T: PtrTrait, F: Field<T> + Sync>(

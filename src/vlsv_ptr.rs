@@ -9,10 +9,12 @@ use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::sync::{Arc, Mutex};
+use std::cmp;
 
-const TOUT: f64 = 5.0;
-const TMAX: f64 = 500.0;
-const DEFAULT_VLSV: &str = "/home/kstppd/Desktop/bulk.0000601.vlsv";
+const TOUT: f64 = 1.0;
+const TMIN: f64 = 1429.0;
+const TMAX: f64 = 1451.0;
+const DEFAULT_VLSV: &str = "/wrk-vakka/group/spacephysics/vlasiator/3D/FHA/bulk1/";
 
 pub fn push_population_cpu_adpt<T: PtrTrait, F: Field<T> + Sync>(
     pop: &mut Arc<Mutex<ParticlePopulation<T>>>,
@@ -49,9 +51,44 @@ pub fn push_population_cpu_adpt<T: PtrTrait, F: Field<T> + Sync>(
     *actual_time = *actual_time + time_span;
 }
 
+pub fn backtrace_population_cpu_adpt<T: PtrTrait, F: Field<T> + Sync>(
+    pop: &mut Arc<Mutex<ParticlePopulation<T>>>,
+    f: &F,
+    time_span: T,
+    actual_time: &mut T,
+) {
+    let n = pop.lock().unwrap().size();
+    let mass = pop.lock().unwrap().mass;
+    let charge = pop.lock().unwrap().charge;
+
+    (0..n).into_par_iter().for_each(|i| {
+        let pr = Arc::clone(&pop);
+        let mut particle = {
+            let pop_ref = pr.lock().unwrap();
+            pop_ref.get_temp_particle(i)
+        };
+
+        let mut dt_val = T::from(-1e-4).unwrap();
+        boris_backtracing_adaptive(
+            &mut particle,
+            f,
+            &mut dt_val,
+            *actual_time,
+            *actual_time + time_span,
+            mass,
+            charge,
+        );
+
+        let mut pop_ref = pr.lock().unwrap();
+        pop_ref.take_temp_particle(&particle, i);
+    });
+
+    *actual_time = *actual_time + time_span;
+}
+
 fn main() -> Result<std::process::ExitCode, std::process::ExitCode> {
     let args: Vec<String> = env::args().collect();
-    let fields = VlsvStaticField::<f64>::new(&String::from(DEFAULT_VLSV), [false, false, false]);
+    let fields = VlsvDynamicField::<f64>::new(&String::from(DEFAULT_VLSV), [false, false, false],TMIN,TMAX);
     let mass = physical_constants::f64::PROTON_MASS;
     let charge = physical_constants::f64::PROTON_CHARGE;
     let mut actual_time: f64 = 0.0;
@@ -91,14 +128,17 @@ fn main() -> Result<std::process::ExitCode, std::process::ExitCode> {
     let mut pop_arc = Arc::new(Mutex::new(pop));
     let mut out_count = 0;
 
+    // while actual_time > TMIN+1.0 {
     while actual_time < TMAX {
         let n_alive = pop_arc.lock().unwrap().count_alive();
         println!(
-            "Tracing {} particles [{} alive]at t= {:.3} s",
+            "Tracing {} particles [{} alive] at t= {:.3} s",
             num_particles, n_alive, actual_time
         );
 
         push_population_cpu_adpt(&mut pop_arc, &fields, TOUT, &mut actual_time);
+        // backtrace_population_cpu_adpt(&mut pop_arc, &fields, TOUT, &mut actual_time);
+
 
         let fname = format!("state.{:07}.ptr", out_count);
         let locked = pop_arc.lock().unwrap();
