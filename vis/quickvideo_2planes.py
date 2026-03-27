@@ -35,7 +35,7 @@ def plotFile(input):
     circle1 = plt.Circle((0, 0), 1, color='b',alpha=0.5)
     axes[0].add_patch(circle)
     axes[1].add_patch(circle1)
-    plt.savefig("pop_"+str(19+cnt).zfill(7)+".png",dpi=500)
+    plt.savefig("filtered_"+str(cnt+18).zfill(7)+".png",dpi=500)
     plt.clf()
     plt.close()
 

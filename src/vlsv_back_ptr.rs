@@ -10,9 +10,9 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::sync::{Arc, Mutex};
 
-const TOUT: f64 = -1.0;
-const TMIN: f64 = 1410.0;
-const TMAX: f64 = 1431.0;
+const TOUT: f64 = -0.2;
+const TMIN: f64 = 1405.0;
+const TMAX: f64 = 1430.0048;
 const DEFAULT_VLSV: &str = "/wrk-vakka/group/spacephysics/vlasiator/3D/FHA/bulk1/";
 
 pub fn backtrace_population_cpu_adpt<T: PtrTrait, F: Field<T> + Sync>(
@@ -56,6 +56,7 @@ fn main() -> Result<std::process::ExitCode, std::process::ExitCode> {
     let mass = physical_constants::f64::PROTON_MASS;
     let charge = physical_constants::f64::PROTON_CHARGE;
     let mut actual_time: f64 = 0.0;
+
 
     let mut pop = ParticlePopulation::<f64>::new(1024, mass, charge);
 
@@ -101,7 +102,9 @@ fn main() -> Result<std::process::ExitCode, std::process::ExitCode> {
 
         backtrace_population_cpu_adpt(&mut pop_arc, &fields, TOUT, &mut actual_time);
 
-        let fname = format!("state.{:07}.ptr", out_count);
+        let outputname = &args[2];
+        let fname = format!("{}.{:07}.ptr", outputname, out_count);
+    
         let locked = pop_arc.lock().unwrap();
         locked.save(&fname);
         out_count += 1;

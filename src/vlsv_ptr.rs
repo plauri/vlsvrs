@@ -9,11 +9,10 @@ use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::sync::{Arc, Mutex};
-use std::cmp;
 
-const TOUT: f64 = 1.0;
+const TOUT: f64 = 0.2;
 const TMIN: f64 = 1429.0;
-const TMAX: f64 = 1451.0;
+const TMAX: f64 = 1455.0;
 const DEFAULT_VLSV: &str = "/wrk-vakka/group/spacephysics/vlasiator/3D/FHA/bulk1/";
 
 pub fn push_population_cpu_adpt<T: PtrTrait, F: Field<T> + Sync>(
@@ -140,7 +139,9 @@ fn main() -> Result<std::process::ExitCode, std::process::ExitCode> {
         // backtrace_population_cpu_adpt(&mut pop_arc, &fields, TOUT, &mut actual_time);
 
 
-        let fname = format!("state.{:07}.ptr", out_count);
+        let outputname = &args[2];
+        let fname = format!("{}.{:07}.ptr", outputname, out_count);
+
         let locked = pop_arc.lock().unwrap();
         locked.save(&fname);
         out_count += 1;
