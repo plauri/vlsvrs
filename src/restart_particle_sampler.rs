@@ -181,7 +181,7 @@ fn main() {
                 return Vec::<Option<Particle>>::new();
             }
             let moments_r = f
-                .read_vg_variable_at::<f64>("moments_r", &[cid])
+                .read_vg_variable_at::<f64>("proton/vg_v", &[cid])
                 .expect("Could not read moments");
 
             let vg_v = [moments_r[1], moments_r[2], moments_r[3]];
