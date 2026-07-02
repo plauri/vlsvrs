@@ -184,7 +184,7 @@ fn main() {
                 .read_vg_variable_at::<f64>("proton/vg_v", &[cid])
                 .expect("Could not read moments");
 
-            let vg_v = [moments_r[1], moments_r[2], moments_r[3]];
+            let vg_v = [moments_r[0], moments_r[1], moments_r[2]];
             let dist = WeightedIndex::new(&weights).unwrap();
 
             (0..cli.ppc)
